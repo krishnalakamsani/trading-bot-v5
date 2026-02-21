@@ -643,7 +643,6 @@ async def websocket_endpoint(websocket: WebSocket):
                             interval = int(msg.get('interval') or config.get('candle_interval', 5) or 5)
                             try:
                                 from tick_engine import tick_engine
-                                tick_engine.subscribe(index_name=index, candle_interval=interval)
                                 logger.info(f"[WS] Client {client} subscribed to {index}/{interval}s")
                             except Exception as e:
                                 logger.warning(f"[WS] Subscribe failed: {e}")

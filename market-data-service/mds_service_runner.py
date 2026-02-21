@@ -16,10 +16,6 @@ async def _run():
         logger.exception(f"Failed to import market data modules: {e}")
         return
 
-    # Debug: log what we see from config and environment (helps diagnose missing creds)
-    logger.info(f"config.dhan_access_token={config.get('dhan_access_token')!r}, config.dhan_client_id={config.get('dhan_client_id')!r}")
-    logger.info(f"env DHAN_ACCESS_TOKEN present={bool(os.getenv('DHAN_ACCESS_TOKEN'))}, DHAN_CLIENT_ID present={bool(os.getenv('DHAN_CLIENT_ID'))}")
-
     # Prefer credentials from runtime config, fall back to environment variables
     dhan_access = config.get('dhan_access_token') or os.getenv('DHAN_ACCESS_TOKEN')
     dhan_client = config.get('dhan_client_id') or os.getenv('DHAN_CLIENT_ID')

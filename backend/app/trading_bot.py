@@ -738,6 +738,7 @@ class TradingBot:
         # Only require Dhan in live mode. Paper mode can run without broker SDK.
         if bot_state.get('mode') != 'paper':
             if not self.initialize_dhan():
+                state_machine.stop()
                 return {"status": "error", "message": "Dhan API not available (credentials/SDK)"}
         else:
             # In paper mode, optionally initialize Dhan for live quotes if enabled
