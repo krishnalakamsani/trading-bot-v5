@@ -1,0 +1,9 @@
+# Market Data Service requirements
+# Add only the dependencies needed for the market data service
+
+# Example (edit as needed):
+fastapi
+httpx
+uvicorn
+pydantic
+python-dotenv

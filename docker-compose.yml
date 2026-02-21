@@ -1,0 +1,81 @@
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    container_name: niftyalgo-backend
+    restart: unless-stopped
+    ports:
+      - "8001:8001"
+    volumes:
+      - ./backend/data:/app/data
+      - ./backend/logs:/app/logs
+    environment:
+      - CORS_ORIGINS=*
+      - BOT_MODE=live
+      - AUTO_START_BOT=true
+      - PRUNE_DB_ON_STARTUP=true
+      - WS_AUTH_TOKEN=${WS_AUTH_TOKEN:-}
+      - MDS_BASE_URL=${MDS_BASE_URL:-}
+      - MDS_POLL_SECONDS=${MDS_POLL_SECONDS:-1.0}
+      - PREFETCH_CANDLES_ON_START=true
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8001/api/status"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s    # give FastAPI time to fully start before first check
+    networks:
+      - niftyalgo-network
+
+  frontend:
+    build:
+      context: .
+      dockerfile: frontend/Dockerfile
+      args:
+        - REACT_APP_BACKEND_URL=${REACT_APP_BACKEND_URL:-http://localhost:8001}
+        - REACT_APP_WS_TOKEN=${WS_AUTH_TOKEN:-}
+    container_name: niftyalgo-frontend
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    depends_on:
+      backend:
+        condition: service_healthy    # wait until backend passes health check
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:80"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    networks:
+      - niftyalgo-network
+
+  market-data:
+    build:
+      context: .
+      dockerfile: market-data-service/Dockerfile
+    container_name: niftyalgo-market-data
+    restart: unless-stopped
+    command: ["python3", "/app/mds_service_runner.py"]
+    env_file:
+      - path: ./.env
+        required: false
+    volumes:
+      - ./backend/data:/app/data
+      - ./backend/logs:/app/logs
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8002/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
+    networks:
+      - niftyalgo-network
+
+networks:
+  niftyalgo-network:
+    driver: bridge
+
+volumes:
+  timescale_data:
