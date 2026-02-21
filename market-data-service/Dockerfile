@@ -9,11 +9,12 @@ RUN apt-get update && apt-get install -y \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy requirements and install
-COPY ./requirements.txt /app/requirements.txt
+COPY backend/app/requirements.txt .
 RUN pip install --no-cache-dir -r /app/requirements.txt
 
 # Copy all market data service code
-COPY . /app
+COPY backend/app/ .
+COPY market-data-service/ .
 
 EXPOSE 8001
 
