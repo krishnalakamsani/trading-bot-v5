@@ -1,5 +1,6 @@
 import httpx
 import logging
+from typing import Any, Optional, List  # add Any if missing
 
 
 _client: httpx.AsyncClient | None = None
